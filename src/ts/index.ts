@@ -8,6 +8,7 @@ import "@babylonjs/core/Loading/loadingScreen";
 import { WebGPUEngine } from "@babylonjs/core/Engines";
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
+import glslangModule from "@webgpu/glslang/dist/web-devel-onefile/glslang";
 
 import { WaterMaterial } from "./waterMaterial";
 import { PhillipsSpectrum } from "./spectrum/phillipsSpectrum";
@@ -33,7 +34,8 @@ if (!(await WebGPUEngine.IsSupportedAsync)) {
     alert("WebGPU is not supported in your browser. Please check the compatibility here: https://github.com/gpuweb/gpuweb/wiki/Implementation-Status#implementation-status");
 }
 
-const engine = new WebGPUEngine(canvas, { antialias: true });
+const glslang = await glslangModule();
+const engine = new WebGPUEngine(canvas, { antialias: true, glslangOptions: { glslang } });
 engine.loadingScreen.displayLoadingUI();
 await engine.initAsync();
 

@@ -45,6 +45,7 @@
     "serve:docs": "http-server docs -p 8081"
   },
   "dependencies": {
+    "@webgpu/glslang": "^0.0.15",
     "babylon.font": "github:ycw/babylon.font",
     "earcut": "^3.0.2",
     "opentype.js": "^1.3.4"

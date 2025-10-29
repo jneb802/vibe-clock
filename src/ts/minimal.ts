@@ -6,6 +6,7 @@ import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import { WebGPUEngine } from "@babylonjs/core/Engines";
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
+import glslangModule from "@webgpu/glslang/dist/web-devel-onefile/glslang";
 
 import { WaterMaterial } from "./waterMaterial";
 import { PhillipsSpectrum } from "./spectrum/phillipsSpectrum";
@@ -14,7 +15,8 @@ const canvas = document.getElementById("renderer") as HTMLCanvasElement;
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const engine = new WebGPUEngine(canvas);
+const glslang = await glslangModule();
+const engine = new WebGPUEngine(canvas, { glslangOptions: { glslang } });
 await engine.initAsync();
 
 const scene = new Scene(engine);
