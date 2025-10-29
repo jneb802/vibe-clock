@@ -2,6 +2,7 @@ import "../styles/index.css";
 
 import { Scene } from "@babylonjs/core/scene";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { Color3 } from "@babylonjs/core/Maths/math.color";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import "@babylonjs/core/Loading/loadingScreen";
 import { WebGPUEngine } from "@babylonjs/core/Engines";
@@ -14,6 +15,7 @@ import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
 import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import { PostProcess } from "@babylonjs/core/PostProcesses/postProcess";
 import { Effect } from "@babylonjs/core/Materials/effect";
+import { Clock } from "./clock";
 
 import "@babylonjs/core/Rendering/depthRendererSceneComponent";
 
@@ -37,7 +39,7 @@ await engine.initAsync();
 
 const scene = new Scene(engine);
 
-const camera = new ArcRotateCamera("camera", 3.14 / 3, 0.02 + 3.14 / 2, 15, new Vector3(0, 1.5, 0), scene);
+const camera = new ArcRotateCamera("camera", Math.PI, 0.02 + 3.14 / 2, 20, new Vector3(0, 1.5, 0), scene);
 camera.wheelPrecision = 100;
 camera.angularSensibilityX = 3000;
 camera.angularSensibilityY = 3000;
@@ -53,6 +55,13 @@ const tileSize = 10;
 const depthRenderer = scene.enableDepthRenderer(camera, false, true);
 const initialSpectrum = new PhillipsSpectrum(textureSize, tileSize, engine);
 const waterMaterial = new WaterMaterial("waterMaterial", initialSpectrum, scene, engine);
+
+// Create the 3D clock
+const clock = new Clock(scene, camera);
+clock.container.rotation.y = Math.PI / -2;
+clock.container.position.z = -0.1;
+clock.container.position.set(-5, 0, 0);
+
 
 /*const oceanPlanetMaterial = new OceanPlanetMaterial("oceanPlanet", initialSpectrum, scene);
 const planetRadius = 2;
@@ -123,6 +132,24 @@ postProcess.onApplyObservable.add((effect) => {
 function updateScene() {
     const deltaSeconds = engine.getDeltaTime() / 1000;
     waterMaterial.update(deltaSeconds, light.direction);
+    clock.update();
+    
+    // Constrain camera position to stay within water bounds
+    const waterBounds = radius * tileSize;
+    const camPos = camera.position;
+    
+    if (Math.abs(camPos.x) > waterBounds || Math.abs(camPos.z) > waterBounds) {
+        // Clamp camera position
+        const clampedX = Math.max(-waterBounds, Math.min(waterBounds, camPos.x));
+        const clampedZ = Math.max(-waterBounds, Math.min(waterBounds, camPos.z));
+        
+        // Calculate new target based on clamped position
+        const direction = camera.target.subtract(camPos).normalize();
+        camera.position.x = clampedX;
+        camera.position.z = clampedZ;
+        camera.target.copyFrom(camera.position.add(direction.scale(camera.radius)));
+    }
+    
     //oceanPlanetMaterial.update(deltaSeconds, planet.transform, light.direction);
 }
 

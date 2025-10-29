@@ -3,6 +3,7 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 const isProduction = process.env.NODE_ENV === "production";
 const htmlPath = path.join(__dirname, "/src/html/");
@@ -41,7 +42,15 @@ const config = {
             template: path.join(htmlPath, "index.html"),
             chunks: ["planet"]
         }),
-        new MiniCssExtractPlugin()
+        new MiniCssExtractPlugin(),
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, "src/assets"),
+                    to: path.resolve(__dirname, "dist/assets")
+                }
+            ]
+        })
     ],
 
     module: {
